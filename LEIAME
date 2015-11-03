@@ -9,8 +9,8 @@ Dados do simulador:
     * FAT.
 
 Um bloco são 4KB.
-A unidade simulada é um arquivo com 25000 blocos (100MB).
-Os metadados são os 4 primeiros blocos do arquivo.
+A unidade simulada é um arquivo com no máximo 25000 blocos (100MB).
+Os metadados são os 4 primeiros blocos da unidade simulada.
 Os dados são os blocos restantes.
 Cada bloco dos dados podem ser identificado por um índice que vai de 0 à 24995.
 Os arquivos e diretórios são um sequencia de blocos, que possuem a informação de nome, tamanho em bytes (menos no caso
@@ -19,5 +19,14 @@ foi acessado.
 Os blocos dos dados podem ser usados para armazenar informações de arquivos ou diretórios.
 O mapa de bits é usado para indicar, com 1, quais dos blocos estão livres e, com 0, quais estão ocupados.
 O FAT é uma tabela que associa o índice de um bloco com outro para informar que um bloco tem o outro como sequencia.
-Os 4 primeiros blocos da unidade simulada é usado para armazenar o mapa de bits e o FAT.
-O mapa de bits seguido do FAT são os Metadados.
+Os metadados são usados para armazenar o mapa de bits e o FAT.
+Os metadados seguidos dos dados formam a unidade simulada.
+
+Funções:
+    * carrega_metadados
+    * cria_unidade
+
+A função carrega_metadados deve carregar os metadados que estão no arquivo_especificado.
+A função cria_unidade deve criar uma unidade simulada.
+A função mount tenta executar a função carrega_metadados, se o arquivo_especificado não existe então a função
+cria_unidade é chamada e em seguida a função carrega_metadados é chamado mais uma vez.
