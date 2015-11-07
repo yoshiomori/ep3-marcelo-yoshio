@@ -1,32 +1,32 @@
-Dados do simulador:
-    * Bloco;
-    * Unidade Simulada;
-    * Metadados;
-    * Dados;
-    * Arquivo;
-    * Diretório;
-    * Mapa de bits;
-    * FAT.
+1   Casos de Uso
+No prompt, o usuário inicialmente pode dar os comandos mount ou sai.
+Se o comando mount for um comando válido, o usuário pode dar os comandos cp, mkdir, rmdir, cat, touch, rm, dir, ls,
+find, df, umount, ou sai.
 
+2.  Requisito funcionais
+2.1 mount
+Deve receber como parâmetro um nome_arquivo.
+Os dados mapa_bits, Fat são carregados da unidadesimulada para a memória.
+O mapa de bits e a tabela FAT ocupam juntos 14 blocos (2 bytes para o mapa de bits e (25000 - 14) vezes 2 bytes para o
+FAT).
+O diretório raíz está no primeiro bloco após o cabeçalho (14 * 4000)b.
+Para que o mount funcione é necessário duas funções, uma que faz o carregamento, quando a unidadesimulada existe, e
+outra função que gera a unidadesimulada quando não é encontrada.
+
+3   Dados
 Um bloco são 4KB.
 A unidade simulada é um arquivo com no máximo 25000 blocos (100MB).
-Os metadados são os 4 primeiros blocos da unidade simulada.
+Os metadados são os 14 primeiros blocos da unidade simulada.
 Os dados são os blocos restantes.
-Cada bloco dos dados podem ser identificado por um índice que vai de 0 à 24995.
-Os arquivos e diretórios são um sequencia de blocos, que possuem a informação de nome, tamanho em bytes (menos no caso
-do diretório), Instante de tempo em que foi criado, Instante de tempo em que foi modificado e instante de tempo em que
-foi acessado.
+Cada bloco dos dados podem ser identificado por um índice que vai de 0 à (24999 - 14).
+Os arquivos e diretórios são uma sequencia de blocos, que possuem: magic number(1b), nome(255b), tamanho em bytes (menos
+no caso do diretório)(2b), Instante de tempo em que foi criado(24b), Instante de tempo em que foi modificado(24b) e
+instante de tempo em que foi acessado(24b). Magic Number(1b) igual a 0xff significa arquivo, enquanto que 0x00 significa
+diretório.
 Os blocos dos dados podem ser usados para armazenar informações de arquivos ou diretórios.
 O mapa de bits é usado para indicar, com 1, quais dos blocos estão livres e, com 0, quais estão ocupados.
 O FAT é uma tabela que associa o índice de um bloco com outro para informar que um bloco tem o outro como sequencia.
 Os metadados são usados para armazenar o mapa de bits e o FAT.
 Os metadados seguidos dos dados formam a unidade simulada.
-
-Funções:
-    * carrega_metadados
-    * cria_unidade
-
-A função carrega_metadados deve carregar os metadados que estão no arquivo_especificado.
-A função cria_unidade deve criar uma unidade simulada.
-A função mount tenta executar a função carrega_metadados, se o arquivo_especificado não existe então a função
-cria_unidade é chamada e em seguida a função carrega_metadados é chamado mais uma vez.
+Cada entrada da tabela FAT são dois bytes representado o índice de um bloco.
+O primeiro bloco dos dados contém o diretório raiz.
