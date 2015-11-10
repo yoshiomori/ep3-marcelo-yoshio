@@ -1,22 +1,16 @@
 from time import asctime
 
-from fat import Fat
-from mapa_bits import BitMap
+import sys
 
 
 class Root(object):
-    def __init__(self, bitmap, fat):
+    def __init__(self):
         self.nome = '/'
         self.access = asctime()
         self.modify = asctime()
         self.create = asctime()
         self.tabela = {}
-        if type(bitmap) is not BitMap:
-            raise TypeError('type bitmap is not BitMap')
-        self.mapa_bits = bitmap
-        if type(fat) is not Fat:
-            raise TypeError('type fat is not Fat')
-        self.fat = fat
+        self.file = None
 
     def set_name(self, nome):
         if type(nome) is not str:
@@ -24,3 +18,49 @@ class Root(object):
         self.modify = asctime()
         self.access = asctime()
         self.nome = nome
+
+    def set_file(self, file):
+        self.file = file
+
+    def set_table(self, nome, index):
+        if type(nome) is not str:
+            raise TypeError('type nome is not str')
+        if len(nome) > 8:
+            raise RuntimeError('nome excedeu tamanho máximo(8)')
+        if type(index) is not int:
+            raise TypeError('type index is not int')
+        if index < 0 or 24984 < index:
+            raise RuntimeError('index deve estar entre 0 e 24984')
+        if len(self.tabela) > 392:
+            raise RuntimeError('Tabela excedeu tamanho máximo 392')
+        self.tabela.setdefault(nome, index)
+
+    def is_full(self):
+        return len(self.tabela) == 392
+
+    def load(self):
+        if self.file is None:
+            raise RuntimeError('Não foi carregado o arquivo')
+        self.file.seek(56000)
+        self.nome = self.file.read(8).replace(b'\x00', b'').decode()
+        self.access = self.file.read(24).decode()
+        self.modify = self.file.read(24).decode()
+        self.create = self.file.read(24).decode()
+        self.tabela = dict()
+        for _ in range(392):
+            nome = self.file.read(8).replace(b'\x00', b'').decode()
+            index = int.from_bytes(self.file.read(2), sys.byteorder)
+            if nome is not '':
+                self.tabela.setdefault(nome, index)
+
+    def save(self):
+        if self.file is None:
+            raise RuntimeError('Não foi carregado o arquivo')
+        self.file.seek(56000)
+        self.file.write(self.nome.encode('unicode_escape').rjust(8, b'\x00'))
+        self.file.write(self.access.encode('unicode_escape'))
+        self.file.write(self.modify.encode('unicode_escape'))
+        self.file.write(self.create.encode('unicode_escape'))
+        for nome, index in self.tabela.items():
+            self.file.write(nome.encode('unicode_escape').rjust(8, b'\x00'))
+            self.file.write(index.to_bytes(2, sys.byteorder))
