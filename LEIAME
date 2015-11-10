@@ -28,3 +28,6 @@ O primeiro bloco do arquivo tem :
 É necessário saber carregar do disco para a memória e vice versa o mapa de bits, FAT, diretório raíz, diretório
 e arquivo. No caso do diretório e arquivo, o carregamento envolve o FAT, mapa de bits e o índice do o primeiro bloco da
 sequencia.
+
+Quando a tabela do diretório é modificado o instante de acesso é atualizado.
+Quando o nome do diretório é modificado o instante de acesso e modificação são atualizados.

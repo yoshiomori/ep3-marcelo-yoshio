@@ -2,7 +2,7 @@ from root import Root
 
 
 root = Root()
-root.set_table('var', 0)
+root.add_entry('var', 0)
 file = open('root_test', 'wb')
 root.set_file(file)
 root.save()
@@ -14,3 +14,7 @@ root.set_file(file)
 root.load()
 file.close()
 print("root.load() -> root.tabela['var'] =", root.tabela['var'], 'Espero 0')
+print('root.is_full() =', root.is_full(), 'Espero False')
+if root.tem('var'):
+    root.del_entry('var')
+print("root.tem('var') =", root.tem('var'), 'Espero False')

@@ -22,7 +22,7 @@ class Root(object):
     def set_file(self, file):
         self.file = file
 
-    def set_table(self, nome, index):
+    def add_entry(self, nome, index):
         if type(nome) is not str:
             raise TypeError('type nome is not str')
         if len(nome) > 8:
@@ -33,10 +33,37 @@ class Root(object):
             raise RuntimeError('index deve estar entre 0 e 24984')
         if len(self.tabela) > 392:
             raise RuntimeError('Tabela excedeu tamanho máximo 392')
-        self.tabela.setdefault(nome, index)
+        self.access = asctime()
+        self.tabela[nome] = index
+
+    def del_entry(self, nome):
+        if type(nome) is not str:
+            raise TypeError('type nome is not str')
+        if len(nome) > 8:
+            raise RuntimeError('nome excedeu tamanho máximo(8)')
+        if len(self.tabela) > 392:
+            raise RuntimeError('Tabela excedeu tamanho máximo 392')
+        self.access = asctime()
+        self.tabela.pop(nome)
+
+    def get_entry(self, nome):
+        if type(nome) is not str:
+            raise TypeError('type nome is not str')
+        if len(nome) > 8:
+            raise RuntimeError('nome excedeu tamanho máximo(8)')
+        if len(self.tabela) > 392:
+            raise RuntimeError('Tabela excedeu tamanho máximo 392')
+        return self.tabela[nome]
 
     def is_full(self):
-        return len(self.tabela) == 392
+        return len(self.tabela) >= 392
+
+    def tem(self, nome):
+        if type(nome) is not str:
+            raise TypeError('type nome is not str')
+        if len(nome) > 8:
+            raise RuntimeError('nome excedeu tamanho máximo(8)')
+        return nome in self.tabela.keys()
 
     def load(self):
         if self.file is None:
@@ -51,7 +78,7 @@ class Root(object):
             nome = self.file.read(8).replace(b'\x00', b'').decode()
             index = int.from_bytes(self.file.read(2), sys.byteorder)
             if nome is not '':
-                self.tabela.setdefault(nome, index)
+                self.tabela[nome] = index
 
     def save(self):
         if self.file is None:
@@ -64,3 +91,4 @@ class Root(object):
         for nome, index in self.tabela.items():
             self.file.write(nome.encode('unicode_escape').rjust(8, b'\x00'))
             self.file.write(index.to_bytes(2, sys.byteorder))
+        self.file.write(b'\x00' * (60000 - self.file.tell()))
