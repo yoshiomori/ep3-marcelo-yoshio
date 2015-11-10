@@ -10,7 +10,7 @@ O diretório é dividido em 6 partes:
   24 B para armazenar o instante de criação.
   24 B para armazenar o instante de modificação.
   24 B para armazenar o instante de acesso.
-3920 B para armazenar a tabela, entradas com tudo 0xff representam linhas vazias.
+3920 B para armazenar a tabela, entradas com tudo 0x00 representam linhas vazias.
 As linhas da tabela são divididas em 2 partes:
    8 B para armazenar o nome do arquivo no diretório.
    2 B para armazenar o índice do bloco.

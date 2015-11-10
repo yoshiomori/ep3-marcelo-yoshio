@@ -84,11 +84,11 @@ class Root(object):
         if self.file is None:
             raise RuntimeError('Não foi carregado o arquivo')
         self.file.seek(56000)
-        self.file.write(self.nome.encode('unicode_escape').rjust(8, b'\x00'))
-        self.file.write(self.access.encode('unicode_escape'))
-        self.file.write(self.modify.encode('unicode_escape'))
-        self.file.write(self.create.encode('unicode_escape'))
+        self.file.write(self.nome.encode('ascii', 'replace').rjust(8, b'\x00'))
+        self.file.write(self.access.encode('ascii', 'replace'))
+        self.file.write(self.modify.encode('ascii', 'replace'))
+        self.file.write(self.create.encode('ascii', 'replace'))
         for nome, index in self.tabela.items():
-            self.file.write(nome.encode('unicode_escape').rjust(8, b'\x00'))
+            self.file.write(nome.encode('ascii', 'replace').rjust(8, b'\x00'))
             self.file.write(index.to_bytes(2, sys.byteorder))
         self.file.write(b'\x00' * (60000 - self.file.tell()))
