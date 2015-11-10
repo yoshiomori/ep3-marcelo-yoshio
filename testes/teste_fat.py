@@ -1,0 +1,16 @@
+from fat import Fat
+f = Fat()
+print('f.get(4242) =', f.get(4242), 'Espero -1')
+f.set(4242, 4242)
+print('f.set(4242, 4242) -> f.get(4242) =', f.get(4242), 'Espero 4242')
+file = open('fat_test', 'wb')
+f.set_file(file)
+f.save()
+file.close()
+
+f = Fat()
+file = open('fat_test', 'rb')
+f.set_file(file)
+f.load()
+file.close()
+print('f.load() -> f.get(4242) =', f.get(4242), 'Espero 4242')
