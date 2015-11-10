@@ -1,32 +1,30 @@
-1   Casos de Uso
-No prompt, o usuário inicialmente pode dar os comandos mount ou sai.
-Se o comando mount for um comando válido, o usuário pode dar os comandos cp, mkdir, rmdir, cat, touch, rm, dir, ls,
-find, df, umount, ou sai.
+Unidade Simulada é dividida em 4 partes:
+    4 kB para armazenar o mapa de bits
+   52 kB para armazenar o FAT
+    4 kB para armazenar o diretório raíz
+99940 kB para armazenar os dados
+O mapa de bits tem 24985 bits, cada bit diz se um bloco dos dados está em uso ou não.
+O FAT tem 24985 entradas, cada entrada representa o índice de um bloco dos dados.
+O diretório é dividido em 6 partes:
+   8 B para armazenar o nome.
+  24 B para armazenar o instante de criação.
+  24 B para armazenar o instante de modificação.
+  24 B para armazenar o instante de acesso.
+3920 B para armazenar a tabela, entradas com tudo 0xff representam linhas vazias.
+As linhas da tabela são divididas em 2 partes:
+   8 B para armazenar o nome do arquivo no diretório.
+   2 B para armazenar o índice do bloco.
+O diretório raíz pode ter no máximo 392 arquivos, porque ele não tem o FAT para fazer o sequenciamento dos blocos.
+Os dados dos são divididos em 24985 blocos, cada bloco tem 4 kB.
+Um conjuto de blocos é usado para armazenar um arquivo ou diretório.
+O primeiro bloco do arquivo tem :
+   8 B para armazenar o nome.
+   4 B para armazenar o tamanho do arquivo.
+  24 B para armazenar o instante de criação.
+  24 B para armazenar o instante de modificação.
+  24 B para armazenar o instante de acesso.
 
-2.  Requisito funcionais
-2.1 mount
-Deve receber como parâmetro um nome_arquivo.
-Os dados mapa_bits, Fat são carregados da unidadesimulada para a memória.
-O mapa de bits e a tabela FAT ocupam juntos 14 blocos (2 bytes para o mapa de bits e (25000 - 14) vezes 2 bytes para o
-FAT).
-O diretório raíz está no primeiro bloco após o cabeçalho (14 * 4000)b.
-Para que o mount funcione é necessário duas funções, uma que faz o carregamento, quando a unidadesimulada existe, e
-outra função que gera a unidadesimulada quando não é encontrada.
 
-3   Dados
-Um bloco são 4KB.
-A unidade simulada é um arquivo com no máximo 25000 blocos (100MB).
-Os metadados são os 14 primeiros blocos da unidade simulada.
-Os dados são os blocos restantes.
-Cada bloco dos dados podem ser identificado por um índice que vai de 0 à (24999 - 14).
-Os arquivos e diretórios são uma sequencia de blocos, que possuem: magic number(1b), nome(255b), tamanho em bytes (menos
-no caso do diretório)(2b), Instante de tempo em que foi criado(24b), Instante de tempo em que foi modificado(24b) e
-instante de tempo em que foi acessado(24b). Magic Number(1b) igual a 0xff significa arquivo, enquanto que 0x00 significa
-diretório.
-Os blocos dos dados podem ser usados para armazenar informações de arquivos ou diretórios.
-O mapa de bits é usado para indicar, com 1, quais dos blocos estão livres e, com 0, quais estão ocupados.
-O FAT é uma tabela que associa o índice de um bloco com outro para informar que um bloco tem o outro como sequencia.
-Os metadados são usados para armazenar o mapa de bits e o FAT.
-Os metadados seguidos dos dados formam a unidade simulada.
-Cada entrada da tabela FAT são dois bytes representado o índice de um bloco.
-O primeiro bloco dos dados contém o diretório raiz.
+É necessário saber carregar do disco para a memória e vice versa o mapa de bits, FAT, diretório raíz, diretório
+e arquivo. No caso do diretório e arquivo, o carregamento envolve o FAT, mapa de bits e o índice do o primeiro bloco da
+sequencia.

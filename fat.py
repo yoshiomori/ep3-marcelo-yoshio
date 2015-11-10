@@ -1,1 +1,4 @@
-# Esse módulo irá conter todas as funções necessárias para manipuar o fat
+class Fat(object):
+    def __init__(self):
+        self.fat = [-1] * 24985
+        self.file
