@@ -4,7 +4,6 @@ import sys
 class Fat(object):
     def __init__(self):
         self.fat = [-1] * 24985
-        self.file = None
 
     def set(self, index, value):
         if type(index) is not int:
@@ -20,18 +19,11 @@ class Fat(object):
             raise TypeError('type index is not int')
         return self.fat[index]
 
-    def set_file(self, file):
-        self.file = file
+    def parse_load(self, dado):
+        self.fat = [int.from_bytes(dado[start:start+2], sys.byteorder, signed=True) for start in range(0, 49970, 2)]
 
-    def load(self):
-        if self.file is None:
-            raise RuntimeError('Não foi carregado o arquivo')
-        self.file.seek(4000)
-        self.fat = [int.from_bytes(self.file.read(2), sys.byteorder, signed=True) for _ in range(24985)]
-
-    def save(self):
-        if self.file is None:
-            raise RuntimeError('Não foi carregado o arquivo')
-        self.file.seek(4000)
+    def save_format(self):
+        data = b''
         for value in self.fat:
-            self.file.write(value.to_bytes(2, sys.byteorder, signed=True))
+            data += value.to_bytes(2, sys.byteorder, signed=True)
+        return data

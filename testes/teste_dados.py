@@ -1,4 +1,4 @@
-from dados import ArquivosRegulares
+from arquivo import ArquivosRegulares
 
 arquivo = ArquivosRegulares()
 arquivo.set('teste', 'olá', [0])

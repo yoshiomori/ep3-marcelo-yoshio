@@ -10,17 +10,6 @@ class Root(object):
         self.modify = asctime()
         self.create = asctime()
         self.tabela = {}
-        self.file = None
-
-    def set_name(self, nome):
-        if type(nome) is not str:
-            raise TypeError('type nome is not str')
-        self.modify = asctime()
-        self.access = asctime()
-        self.nome = nome
-
-    def set_file(self, file):
-        self.file = file
 
     def add_entry(self, nome, index):
         if type(nome) is not str:
@@ -51,8 +40,6 @@ class Root(object):
             raise TypeError('type nome is not str')
         if len(nome) > 8:
             raise RuntimeError('nome excedeu tamanho máximo(8)')
-        if len(self.tabela) > 392:
-            raise RuntimeError('Tabela excedeu tamanho máximo 392')
         return self.tabela[nome]
 
     def is_full(self):
@@ -65,30 +52,25 @@ class Root(object):
             raise RuntimeError('nome excedeu tamanho máximo(8)')
         return nome in self.tabela.keys()
 
-    def load(self):
-        if self.file is None:
-            raise RuntimeError('Não foi carregado o arquivo')
-        self.file.seek(56000)
-        self.nome = self.file.read(8).replace(b'\x00', b'').decode()
-        self.access = self.file.read(24).decode()
-        self.modify = self.file.read(24).decode()
-        self.create = self.file.read(24).decode()
+    def parse_load(self, dado):
+        self.nome = dado[0:8].replace(b'\x00', b'').decode()
+        self.access = dado[8:32].decode()
+        self.modify = dado[32:56].decode()
+        self.create = dado[56:80].decode()
         self.tabela = dict()
-        for _ in range(392):
-            nome = self.file.read(8).replace(b'\x00', b'').decode()
-            index = int.from_bytes(self.file.read(2), sys.byteorder)
+        for start in range(80, 4000, 10):
+            nome = dado[start:start+8].replace(b'\x00', b'').decode()
+            index = int.from_bytes(dado[start+8:start+10], sys.byteorder)
             if nome is not '':
                 self.tabela[nome] = index
 
-    def save(self):
-        if self.file is None:
-            raise RuntimeError('Não foi carregado o arquivo')
-        self.file.seek(56000)
-        self.file.write(self.nome.encode('ascii', 'replace').rjust(8, b'\x00'))
-        self.file.write(self.access.encode('ascii', 'replace'))
-        self.file.write(self.modify.encode('ascii', 'replace'))
-        self.file.write(self.create.encode('ascii', 'replace'))
+    def save_format(self):
+        dado = self.nome.encode('ascii', 'replace').rjust(8, b'\x00')
+        dado += self.access.encode('ascii', 'replace')
+        dado += self.modify.encode('ascii', 'replace')
+        dado += self.create.encode('ascii', 'replace')
         for nome, index in self.tabela.items():
-            self.file.write(nome.encode('ascii', 'replace').rjust(8, b'\x00'))
-            self.file.write(index.to_bytes(2, sys.byteorder))
-        self.file.write(b'\x00' * (60000 - self.file.tell()))
+            dado += nome.encode('ascii', 'replace').rjust(8, b'\x00')
+            dado += index.to_bytes(2, sys.byteorder)
+        dado += b'\x00' * (len(dado) % 4000)
+        return dado
