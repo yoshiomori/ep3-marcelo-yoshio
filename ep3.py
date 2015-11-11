@@ -25,19 +25,18 @@ def mount(arquivo):
 
 
 def percorre_caminho(caminho_destino):
-    caminho = caminho_destino.split('/')
-    nome_diretorio = caminho.pop(0)
-    if nome_diretorio is '':
+    if len(caminho_destino) == 0:
         return root
+    nome_diretorio = caminho_destino.pop(0)
     index = fat.get(root.get_entry(nome_diretorio))
-    while len(caminho):
+    while len(caminho_destino):
         dados = Dados(bitmap, fat, 'diretorio', index)
         try:
             dados.load(unidade)
         except NotADirectoryError:
             print(nome_diretorio, 'não é diretório')
             raise RuntimeWarning()
-        index = dados.arquivo.get_entry(caminho.pop(0))
+        index = dados.arquivo.get_entry(caminho_destino.pop(0))
     dados = Dados(bitmap, fat, 'diretorio', index)
     dados.load(unidade)
     return dados
@@ -49,13 +48,18 @@ def aloca():
             bitmap.set_0(index)
             fat.set(index, -1)
             return index
+    raise MemoryError('Sem espaço')
 
 
 def cp(origem, destino):
-    caminho_destino, sep, nome_destino = destino.rpartition('/')
+    caminho_destino, nome_destino = parse_path(destino)
 
     # Retorna um objeto do tipo Dados para diretório
     dados = percorre_caminho(caminho_destino)
+
+    if dados.tem(nome_destino):
+        print('Este Arquivo já existe')
+        return
 
     # É necessário o índice inicial ser alocado aqui, porque esse indice vai ser usado tanto como entrada no diretório
     # correspondente quanto como primeiro índice do bloco do arquivo copiado.
@@ -78,11 +82,24 @@ def cp(origem, destino):
     root.save(unidade)
 
 
+def parse_path(destino):
+    caminho_destino = []
+    for s in destino.split('/'):
+        if s is not '':
+            caminho_destino.append(s)
+    nome_destino = caminho_destino.pop()
+    return caminho_destino, nome_destino
+
+
 def mkdir(diretorio):
-    caminho_diretorio, sep, nome_diretorio = diretorio.rpartition('/')
-    
+    caminho_destino, nome_diretorio = parse_path(diretorio)
+
     # Retorna um objeto do tipo Dados para diretório
-    dados = percorre_caminho(caminho_diretorio)
+    dados = percorre_caminho(caminho_destino)
+
+    if dados.tem(nome_diretorio):
+        print('Já existe este diretório')
+        return
     
     # É necessário o índice inicial ser alocado aqui, porque esse indice vai ser usado tanto como entrada no diretório
     # correspondente quanto como primeiro índice do bloco do arquivo copiado.
@@ -103,21 +120,33 @@ def mkdir(diretorio):
     root.save(unidade)
 
 
+def rmdir_recursivo(index):
+    dados = Dados(bitmap, fat, 'diretorio', index)
+    dados.load(unidade)
+    for arquivos in dados.arquivo.keys():
+        index = dados.get_entry(arquivos)
+        rmdir_recursivo(index)
+    while index is not -1:
+        bitmap.set_1(index)
+        index = fat.get(index)
+
+
 def rmdir(diretorio):
-    caminho_diretorio, sep, nome_diretorio = diretorio.rpartition('/')
+    caminho_destino, nome_diretorio = parse_path(diretorio)
 
     # Retorna um objeto do tipo Dados para diretório
-    dados = percorre_caminho(caminho_diretorio)
+    dados = percorre_caminho(caminho_destino)
 
-    if dados.arquivo.tem(nome_diretorio):
-        index = dados.arquivo.del_entry(nome_diretorio)
+    if dados.tem(nome_diretorio):
+        index = dados.del_entry(nome_diretorio)
         dados.save(unidade)
 
         dados = Dados(bitmap, fat, 'diretorio', index)
+        dados.load(unidade)
         for arquivos in dados.arquivo.keys():
-            rmdir_recursivo(dados, )
-
-
+            index = dados.get_entry(arquivos)
+            rmdir_recursivo(index)
+        bitmap.set_1(index)
 
     bitmap.save(unidade)
     fat.save(unidade)

@@ -129,14 +129,20 @@ class Directory(object):
         if len(nome) > 8:
             raise RuntimeError('nome excedeu tamanho máximo(8)')
         self.access = asctime()
-        return self.tabela.pop(nome)
+        try:
+            return self.tabela.pop(nome)
+        except KeyError:
+            raise FileNotFoundError()
 
     def get_entry(self, nome):
         if type(nome) is not str:
             raise TypeError('type nome is not str')
         if len(nome) > 8:
             raise RuntimeError('nome excedeu tamanho máximo(8)')
-        return self.tabela[nome]
+        try:
+            return self.tabela[nome]
+        except KeyError:
+            raise FileNotFoundError()
 
     def tem(self, nome):
         if type(nome) is not str:

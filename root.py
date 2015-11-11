@@ -33,14 +33,20 @@ class Root(object):
         if len(self.tabela) > 392:
             raise RuntimeError('Tabela excedeu tamanho máximo 392')
         self.access = asctime()
-        self.tabela.pop(nome)
+        try:
+            return self.tabela.pop(nome)
+        except KeyError:
+            raise FileNotFoundError()
 
     def get_entry(self, nome):
         if type(nome) is not str:
             raise TypeError('type nome is not str')
         if len(nome) > 8:
             raise RuntimeError('nome excedeu tamanho máximo(8)')
-        return self.tabela[nome]
+        try:
+            return self.tabela[nome]
+        except KeyError:
+            raise FileNotFoundError()
 
     def is_full(self):
         return len(self.tabela) >= 392
@@ -53,7 +59,7 @@ class Root(object):
         return nome in self.tabela.keys()
 
     def load(self, file):
-        file.seek(58000)
+        file.seek(56000)
         dado = file.read(4000)
         self.nome = dado[0:8].replace(b'\x00', b'').decode()
         self.access = dado[8:32].decode()
@@ -67,7 +73,7 @@ class Root(object):
                 self.tabela[nome] = index
 
     def save(self, file):
-        file.seek(58000)
+        file.seek(56000)
         dado = self.nome.encode('ascii', 'replace').rjust(8, b'\x00')
         dado += self.access.encode('ascii', 'replace')
         dado += self.modify.encode('ascii', 'replace')

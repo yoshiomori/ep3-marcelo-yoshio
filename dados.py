@@ -21,6 +21,9 @@ class Dados(object):
         self.fat = fat
 
     def load(self, file):
+        while self.fat.get(self.last_index) != -1:
+            self.indexes.append(self.last_index)
+            self.last_index = self.fat.get(self.last_index)
         data = b''
         for index in self.indexes + [self.last_index]:
             file.seek(60000 + index * 4000)
@@ -34,12 +37,14 @@ class Dados(object):
                 for index in range(24985):
                     if self.bitmap.get(index):
                         self.bitmap.set_0(index)
-                        self.fat[self.last_index] = index
+                        self.fat.set(self.last_index, index)
                         self.indexes.append(self.last_index)
                         self.last_index = index
                         if len(self.indexes) + 1 == ceil(len(dado) / 4000):
-                            self.fat[self.last_index] = -1
+                            self.fat.set(self.last_index, -1)
                             break
+                    if index == 24984:
+                        raise MemoryError('Sem espaço')
             while len(self.indexes) + 1 > ceil(len(dado) / 4000):
                 self.bitmap.set_1(self.last_index)
                 self.last_index = self.indexes.pop()
