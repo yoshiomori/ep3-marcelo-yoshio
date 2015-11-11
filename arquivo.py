@@ -3,7 +3,21 @@ import sys
 
 
 class ArquivosRegulares(object):
-    def __init__(self, nome, dado):
+    def __init__(self):
+        self.nome = ''
+        self.tamanho = 0
+        self.access = asctime()
+        self.modify = asctime()
+        self.create = asctime()
+        self.dado = ''
+
+    def novo(self, nome, dado):
+        if type(nome) is not str:
+            raise TypeError('type nome is not str')
+        if len(nome) > 8:
+            raise RuntimeError('nome excedeu tamanho máximo(8)')
+        if type(dado) is not str:
+            raise TypeError('type dado is not str')
         self.nome = nome
         self.tamanho = len(dado)
         self.access = asctime()
@@ -70,7 +84,14 @@ class ArquivosRegulares(object):
 
 
 class Directory(object):
-    def __init__(self, nome):
+    def __init__(self):
+        self.nome = ''
+        self.access = ''
+        self.modify = ''
+        self.create = ''
+        self.tabela = {}
+
+    def novo(self, nome):
         if type(nome) is not str:
             raise TypeError('type nome is not str')
         if len(nome) > 8:
@@ -108,7 +129,7 @@ class Directory(object):
         if len(nome) > 8:
             raise RuntimeError('nome excedeu tamanho máximo(8)')
         self.access = asctime()
-        self.tabela.pop(nome)
+        return self.tabela.pop(nome)
 
     def get_entry(self, nome):
         if type(nome) is not str:
@@ -124,6 +145,9 @@ class Directory(object):
             raise RuntimeError('nome excedeu tamanho máximo(8)')
         return nome in self.tabela.keys()
 
+    def keys(self):
+        return self.tabela.keys()
+
     def parse_load(self, dado):
         self.nome = dado[0:8].replace(b'\x00', b'').decode()
         self.access = dado[8:32].decode()
@@ -134,6 +158,8 @@ class Directory(object):
             nome = dado[start:start+8].replace(b'\x00', b'').decode()
             index = int.from_bytes(dado[start+8:start+10], sys.byteorder)
             if nome is not '':
+                if index >= 24985:
+                    raise NotADirectoryError()  # É usado para identificar um arquivo
                 self.tabela[nome] = index
 
     def save_format(self):
@@ -144,4 +170,5 @@ class Directory(object):
         for nome, index in self.tabela.items():
             dado += nome.encode('ascii', 'replace').rjust(8, b'\x00')
             dado += index.to_bytes(2, sys.byteorder)
-        dado += b'\x00' * (len(dado) % 4000)
+        dado += b'\x00' * (len(dado) % 4000)  # Na hora de salvar é importante zerar o resto para mostra que é diretório
+        return dado

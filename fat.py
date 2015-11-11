@@ -19,11 +19,13 @@ class Fat(object):
             raise TypeError('type index is not int')
         return self.fat[index]
 
-    def parse_load(self, dado):
-        self.fat = [int.from_bytes(dado[start:start+2], sys.byteorder, signed=True) for start in range(0, 49970, 2)]
+    def load(self, unidade):
+        unidade.seek(4000)
+        self.fat = [int.from_bytes(unidade.read(2), sys.byteorder, signed=True) for _ in range(0, 49970, 2)]
 
-    def save_format(self):
+    def save(self, unidade):
         data = b''
         for value in self.fat:
             data += value.to_bytes(2, sys.byteorder, signed=True)
-        return data
+        unidade.seek(4000)
+        unidade.write(data)

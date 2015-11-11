@@ -52,7 +52,9 @@ class Root(object):
             raise RuntimeError('nome excedeu tamanho máximo(8)')
         return nome in self.tabela.keys()
 
-    def parse_load(self, dado):
+    def load(self, file):
+        file.seek(58000)
+        dado = file.read(4000)
         self.nome = dado[0:8].replace(b'\x00', b'').decode()
         self.access = dado[8:32].decode()
         self.modify = dado[32:56].decode()
@@ -64,7 +66,8 @@ class Root(object):
             if nome is not '':
                 self.tabela[nome] = index
 
-    def save_format(self):
+    def save(self, file):
+        file.seek(58000)
         dado = self.nome.encode('ascii', 'replace').rjust(8, b'\x00')
         dado += self.access.encode('ascii', 'replace')
         dado += self.modify.encode('ascii', 'replace')
@@ -73,4 +76,4 @@ class Root(object):
             dado += nome.encode('ascii', 'replace').rjust(8, b'\x00')
             dado += index.to_bytes(2, sys.byteorder)
         dado += b'\x00' * (len(dado) % 4000)
-        return dado
+        file.write(dado)

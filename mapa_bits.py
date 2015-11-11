@@ -26,8 +26,10 @@ class BitMap(object):
             raise RuntimeError('index deve estar entre 0 e 24984')
         return self.bitmap >> index & 1
 
-    def parse_load(self, dado):
-        self.bitmap = int.from_bytes(dado[0:3124], sys.byteorder)
+    def save(self, unidade):
+        unidade.seek(0)
+        unidade.write(self.bitmap.to_bytes(3124, sys.byteorder))
 
-    def save_format(self):
-        return self.bitmap.to_bytes(3124, sys.byteorder)
+    def load(self, unidade):
+        unidade.seek(0)
+        self.bitmap = int.from_bytes(unidade.read(3124), sys.byteorder)
