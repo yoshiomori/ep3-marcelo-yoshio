@@ -5,7 +5,7 @@ import sys
 class ArquivosRegulares(object):
     def __init__(self, nome, dado):
         self.nome = nome
-        self.tamanho = 0
+        self.tamanho = len(dado)
         self.access = asctime()
         self.modify = asctime()
         self.create = asctime()
@@ -50,14 +50,14 @@ class ArquivosRegulares(object):
         return self.dado
 
     def load_parse(self, dado):
-        if dado is not bytes:
+        if type(dado) is not bytes:
             raise TypeError('dado is not bytes')
         self.nome = dado[0:8].replace(b'\x00', b'').decode()
         self.tamanho = int.from_bytes(dado[8:12], sys.byteorder)
         self.create = dado[12:36].decode()
         self.modify = dado[36:60].decode()
         self.access = dado[60:84].decode()
-        self.dado = dado[84:self.tamanho].decode()
+        self.dado = dado[84:84 + self.tamanho].decode()
 
     def save_format(self):
         dado = self.nome.encode('ascii', 'replace').rjust(8, b'\x00')
@@ -71,6 +71,10 @@ class ArquivosRegulares(object):
 
 class Directory(object):
     def __init__(self, nome):
+        if type(nome) is not str:
+            raise TypeError('type nome is not str')
+        if len(nome) > 8:
+            raise RuntimeError('nome excedeu tamanho máximo(8)')
         self.nome = nome
         self.access = asctime()
         self.modify = asctime()
