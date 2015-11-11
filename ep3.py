@@ -27,7 +27,9 @@ def mount(arquivo):
 def percorre_caminho(caminho_destino):
     caminho = caminho_destino.split('/')
     nome_diretorio = caminho.pop(0)
-    index = fat[root.get_entry(nome_diretorio)]
+    if nome_diretorio is '':
+        return root
+    index = fat.get(root.get_entry(nome_diretorio))
     while len(caminho):
         dados = Dados(bitmap, fat, 'diretorio', index)
         try:
@@ -41,24 +43,32 @@ def percorre_caminho(caminho_destino):
     return dados
 
 
+def aloca():
+    for index in range(24985):
+        if bitmap.get(index):
+            bitmap.set_0(index)
+            fat.set(index, -1)
+            return index
+
+
 def cp(origem, destino):
     caminho_destino, sep, nome_destino = destino.rpartition('/')
-    
+
     # Retorna um objeto do tipo Dados para diretório
     dados = percorre_caminho(caminho_destino)
-    
+
     # É necessário o índice inicial ser alocado aqui, porque esse indice vai ser usado tanto como entrada no diretório
     # correspondente quanto como primeiro índice do bloco do arquivo copiado.
     index = aloca()
-    
+
     # Adicionando o novo arquivo como entrada do diretório destino
-    dados.arquivo.set_entry(nome_destino, index)
+    dados.add_entry(nome_destino, index)
     dados.save(unidade)
     
     # Criando um novo arquivo com o mesmo indice da entrada adicionado do diretório com os dados copiados do arquivo
     dados = Dados(bitmap, fat, 'arquivo', index)
     file = open(origem)
-    dados.arquivo.set(nome_destino, file.read())
+    dados.set(nome_destino, file.read())
     file.close()
     dados.save(unidade)
     
@@ -79,11 +89,12 @@ def mkdir(diretorio):
     index = aloca()
     
     # Adicionando o índice do primeiro bloco da sequencia do novo arquivo como entrada do diretório destino
-    dados.arquivo.set_entry(nome_diretorio, index)
+    dados.add_entry(nome_diretorio, index)
     dados.save(unidade)
     
     # Criando um diretorio vazio com o indice adicionado na entrada do outro diretório
     dados = Dados(bitmap, fat, 'diretorio', index)
+    dados.mkdir(nome_diretorio)
     dados.save(unidade)
     
     # Em cada operação devemos salvar o estado dos metadados

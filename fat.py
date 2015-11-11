@@ -10,7 +10,7 @@ class Fat(object):
             raise TypeError('type index is not int')
         if type(value) is not int:
             raise TypeError('type value is not int')
-        if 0 > value or value > 24984:
+        if -1 > value or value > 24984:
             raise RuntimeError('valor deve estar entre 0 e 24984')
         self.fat[index] = value
 

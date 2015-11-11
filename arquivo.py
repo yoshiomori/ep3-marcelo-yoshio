@@ -63,7 +63,7 @@ class ArquivosRegulares(object):
         self.access = asctime()
         return self.dado
 
-    def load_parse(self, dado):
+    def parse_load(self, dado):
         if type(dado) is not bytes:
             raise TypeError('dado is not bytes')
         self.nome = dado[0:8].replace(b'\x00', b'').decode()
@@ -91,7 +91,7 @@ class Directory(object):
         self.create = ''
         self.tabela = {}
 
-    def novo(self, nome):
+    def mkdir(self, nome):
         if type(nome) is not str:
             raise TypeError('type nome is not str')
         if len(nome) > 8:
