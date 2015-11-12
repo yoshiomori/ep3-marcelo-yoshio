@@ -89,3 +89,6 @@ class Dados(object):
 
     def get_nome(self):
         return self.arquivo.get_nome()
+
+    def is_dir(self):
+        return self.arquivo.tipo == b'\xff'

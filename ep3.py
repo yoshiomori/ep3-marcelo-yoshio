@@ -31,11 +31,10 @@ def percorre_caminho(caminho_destino):
     index = root.get_entry(nome_diretorio)
     while len(caminho_destino):
         dados = Dados(bitmap, fat, 'diretorio', index)
-        try:
-            dados.load(unidade)
-        except NotADirectoryError:
-            print(nome_diretorio, 'não é diretório')
-            raise RuntimeWarning()
+        dados.load(unidade)
+        if not dados.is_dir():
+            print('Não é um diretório')
+            raise NotADirectoryError()
         index = dados.arquivo.get_entry(caminho_destino.pop(0))
     dados = Dados(bitmap, fat, 'diretorio', index)
     dados.load(unidade)

@@ -5,25 +5,35 @@ Unidade Simulada é dividida em 4 partes:
 99940 kB para armazenar os dados
 O mapa de bits tem 24985 bits, cada bit diz se um bloco dos dados está em uso ou não.
 O FAT tem 24985 entradas, cada entrada representa o índice de um bloco dos dados.
-O diretório é dividido em 6 partes:
-   8 B para armazenar o nome.
+O diretório raiz é dividido em 4 partes:
   24 B para armazenar o instante de criação.
   24 B para armazenar o instante de modificação.
   24 B para armazenar o instante de acesso.
-3920 B para armazenar a tabela, entradas com tudo 0x00 representam linhas vazias.
+3928 B para armazenar a tabela, entradas com tudo 0x00 representam linhas vazias.
 As linhas da tabela são divididas em 2 partes:
-   8 B para armazenar o nome do arquivo no diretório.
+ 255 B para armazenar o nome do arquivo no diretório.
    2 B para armazenar o índice do bloco.
-O diretório raíz pode ter no máximo 392 arquivos, porque ele não tem o FAT para fazer o sequenciamento dos blocos.
+O diretório raíz pode ter no máximo  15 arquivos, porque ele não tem o FAT para fazer o sequenciamento dos blocos, uma
+vez que a raíz pertence ao conjuto dos metadados.
+
+O diretório é dividido em 7 partes:
+   1 B para armazenar a informação de que é Diretório, com 0xff.
+ 255 B para armazenar o nome.
+  24 B para armazenar o instante de criação.
+  24 B para armazenar o instante de modificação.
+  24 B para armazenar o instante de acesso.
+3672 B para armazenar a tabela, entradas com tudo 0x00 representam linhas vazias.
+
 Os dados dos são divididos em 24985 blocos, cada bloco tem 4 kB.
 Um conjuto de blocos é usado para armazenar um arquivo ou diretório.
 O primeiro bloco do arquivo tem :
-   8 B para armazenar o nome.
+   1 B para armazenar a informação de que é Arquivo Regular, com 0x00.
+ 255 B para armazenar o nome.
    4 B para armazenar o tamanho do arquivo.
   24 B para armazenar o instante de criação.
   24 B para armazenar o instante de modificação.
   24 B para armazenar o instante de acesso.
-
+3668 B para armazenar os conteudo do arquivo.
 
 É necessário saber carregar do disco para a memória e vice versa o mapa de bits, FAT, diretório raíz, dados.
 No caso dos dados, são 99940 kB. Para contornar esse problema, iremos carregar apenas os blocos de um arquivo
