@@ -49,12 +49,12 @@ class Dados(object):
                 self.bitmap.set_1(self.last_index)
                 self.last_index = self.indexes.pop()
                 self.fat[self.last_index] = -1
+            start = 0
             for index in self.indexes:
-                start = index * 4000
-                file.seek(60000+start)
+                file.seek(60000 + index * 4000)
                 file.write(dado[start:start+4000])
-            start = self.last_index * 4000
-            file.seek(60000+start)
+                start += 4000
+            file.seek(60000 + self.last_index * 4000)
             file.write(dado[start:])
         else:
             file.seek(60000)
@@ -83,3 +83,9 @@ class Dados(object):
 
     def mkdir(self, nome):
         self.arquivo.mkdir(nome)
+
+    def get_dado(self):
+        return self.arquivo.get_dado()
+
+    def get_nome(self):
+        return self.arquivo.get_nome()

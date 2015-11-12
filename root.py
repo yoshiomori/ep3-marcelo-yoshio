@@ -46,6 +46,7 @@ class Root(object):
         try:
             return self.tabela[nome]
         except KeyError:
+            print(nome, 'arquivo ou diretório não existe')
             raise FileNotFoundError()
 
     def is_full(self):

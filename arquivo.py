@@ -44,6 +44,8 @@ class ArquivosRegulares(object):
             raise RuntimeError('nome excedeu tamanho máximo(8)')
         if type(dado) is not str:
             raise TypeError('type dado is not str')
+        if nome is '':
+            raise TypeError("nome não pode ser ''")
         self.nome = nome
         self.create = asctime()
         self.modify = asctime()
@@ -102,6 +104,9 @@ class Directory(object):
         self.create = asctime()
         self.tabela = {}
 
+    def get_nome(self):
+        return self.nome
+
     def set_name(self, nome):
         if type(nome) is not str:
             raise TypeError('type nome is not str')
@@ -148,7 +153,8 @@ class Directory(object):
         if type(nome) is not str:
             raise TypeError('type nome is not str')
         if len(nome) > 8:
-            raise RuntimeError('nome excedeu tamanho máximo(8)')
+            print('nome excedeu tamanho máximo(8 Bytes)')
+            raise RuntimeWarning('nome excedeu tamanho máximo(8)')
         return nome in self.tabela.keys()
 
     def keys(self):

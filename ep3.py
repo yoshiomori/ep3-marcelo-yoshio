@@ -28,7 +28,7 @@ def percorre_caminho(caminho_destino):
     if len(caminho_destino) == 0:
         return root
     nome_diretorio = caminho_destino.pop(0)
-    index = fat.get(root.get_entry(nome_diretorio))
+    index = root.get_entry(nome_diretorio)
     while len(caminho_destino):
         dados = Dados(bitmap, fat, 'diretorio', index)
         try:
@@ -52,10 +52,7 @@ def aloca():
 
 
 def cp(origem, destino):
-    caminho_destino, nome_destino = parse_path(destino)
-
-    # Retorna um objeto do tipo Dados para diretório
-    dados = percorre_caminho(caminho_destino)
+    dados, caminho_destino, nome_destino = pega_dados(destino)
 
     if dados.tem(nome_destino):
         print('Este Arquivo já existe')
@@ -92,10 +89,7 @@ def parse_path(destino):
 
 
 def mkdir(diretorio):
-    caminho_destino, nome_diretorio = parse_path(diretorio)
-
-    # Retorna um objeto do tipo Dados para diretório
-    dados = percorre_caminho(caminho_destino)
+    dados, caminho_destino, nome_diretorio = pega_dados(diretorio)
 
     if dados.tem(nome_diretorio):
         print('Já existe este diretório')
@@ -123,19 +117,18 @@ def mkdir(diretorio):
 def rmdir_recursivo(index):
     dados = Dados(bitmap, fat, 'diretorio', index)
     dados.load(unidade)
+    nome = dados.get_nome()
     for arquivos in dados.arquivo.keys():
         index = dados.get_entry(arquivos)
         rmdir_recursivo(index)
+    print(nome)
     while index is not -1:
         bitmap.set_1(index)
         index = fat.get(index)
 
 
 def rmdir(diretorio):
-    caminho_destino, nome_diretorio = parse_path(diretorio)
-
-    # Retorna um objeto do tipo Dados para diretório
-    dados = percorre_caminho(caminho_destino)
+    dados, caminho_destino, nome_diretorio = pega_dados(diretorio)
 
     if dados.tem(nome_diretorio):
         index = dados.del_entry(nome_diretorio)
@@ -147,13 +140,31 @@ def rmdir(diretorio):
             index = dados.get_entry(arquivos)
             rmdir_recursivo(index)
         bitmap.set_1(index)
+        print(nome_diretorio,
+              '%s removido%s com sucesso' % ('foram', 's') if len(dados.arquivo.keys()) else ('foi', ''))
+    else:
+        print('Diretório %s não existe' % nome_diretorio)
 
     bitmap.save(unidade)
     fat.save(unidade)
     root.save(unidade)
 
 
+def pega_dados(diretorio):
+    caminho_destino, nome_diretorio = parse_path(diretorio)
+    # Retorna um objeto do tipo Dados para diretório
+    dados = percorre_caminho(caminho_destino)
+    return dados, caminho_destino, nome_diretorio
+
+
 def cat(arquivo):
+    dados, caminho_destino, nome_arquivo = pega_dados(arquivo)
+    if dados.tem(nome_arquivo):
+        index = dados.get_entry(nome_arquivo)
+        dados = Dados(bitmap, fat, 'arquivo', index)
+        dados.load(unidade)
+        print(dados.get_dado())
+        dados.save(unidade)
     bitmap.save(unidade)
     fat.save(unidade)
     root.save(unidade)
@@ -161,6 +172,20 @@ def cat(arquivo):
 
 
 def touch(arquivo):
+    dados, caminho_destino, nome_arquivo = pega_dados(arquivo)
+    if dados.tem(nome_arquivo):
+        index = dados.get_entry(nome_arquivo)
+        dados = Dados(bitmap, fat, 'arquivo', index)
+        dados.load(unidade)
+        dados.get_dado()  # com o get_dado eu estou atualizando o instante de acesso
+        dados.save(unidade)
+    else:
+        index = aloca()
+        dados.add_entry(nome_arquivo, index)
+        dados.save(unidade)
+        dados = Dados(bitmap, fat, 'arquivo', index)
+        dados.set(nome_arquivo, '')
+        dados.save(unidade)
     bitmap.save(unidade)
     fat.save(unidade)
     root.save(unidade)
@@ -168,6 +193,12 @@ def touch(arquivo):
 
 
 def rm(arquivo):
+    dados, caminho_destino, nome_arquivo = pega_dados(arquivo)
+    if nome_arquivo in dados.keys():
+        index = dados.get_entry(nome_arquivo)
+        while index != -1:
+            bitmap.set_1(index)
+            index = fat.get(index)
     bitmap.save(unidade)
     fat.save(unidade)
     root.save(unidade)
@@ -200,39 +231,45 @@ def umount():
 
 
 def main():
+    estado = 'umount'
     while True:
         comando, sep, argumentos = input('[ep3] ').partition(' ')
         try:
-            if comando == 'mount':
+            if comando == 'mount' and estado == 'umount':
                 mount(argumentos)
-            elif comando == 'cp':
+                estado = 'mount'
+            elif comando == 'cp' and estado == 'mount':
                 origem, sep, destino = argumentos.partition(' ')
                 cp(origem, destino)
-            elif comando == 'mkdir':
+            elif comando == 'mkdir' and estado == 'mount':
                 mkdir(argumentos)
-            elif comando == 'rmdir':
+            elif comando == 'rmdir' and estado == 'mount':
                 rmdir(argumentos)
-            elif comando == 'cat':
+            elif comando == 'cat' and estado == 'mount':
                 cat(argumentos)
-            elif comando == 'touch':
+            elif comando == 'touch' and estado == 'mount':
                 touch(argumentos)
-            elif comando == 'rm':
+            elif comando == 'rm' and estado == 'mount':
                 rm(argumentos)
-            elif comando == 'ls':
+            elif comando == 'ls' and estado == 'mount':
                 ls(argumentos)
-            elif comando == 'find':
+            elif comando == 'find' and estado == 'mount':
                 diretorio, sep, arquivo = argumentos.partition(' ')
                 find(diretorio, arquivo)
-            elif comando == 'df':
+            elif comando == 'df' and estado == 'mount':
                 df()
-            elif comando == 'umount':
+            elif comando == 'umount' and estado == 'mount':
                 umount()
+                estado = 'umount'
             elif comando == 'sai':
                 break
+            elif estado == 'umount':
+                print('Comando possíveis:')
+                print('mount e sai')
             else:
                 print('Comando possíveis:')
                 print('mount, cp, mkdir, cat, touch, rm, ls, find, df, umount, sai')
-        except RuntimeWarning():
+        except RuntimeWarning:
             print('Comando inválido')
 if __name__ == '__main__':
     main()
