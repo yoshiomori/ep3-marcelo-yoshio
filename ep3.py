@@ -1,4 +1,3 @@
-from arquivo import ArquivosRegulares, Directory
 from root import Root
 from mapa_bits import BitMap
 from fat import Fat
@@ -30,13 +29,13 @@ def percorre_caminho(caminho_destino):
     nome_diretorio = caminho_destino.pop(0)
     index = root.get_entry(nome_diretorio)
     while len(caminho_destino):
-        dados = Dados(bitmap, fat, 'diretorio', index)
+        dados = Dados(bitmap, fat, index)
         dados.load(unidade)
         if not dados.is_dir():
             print('Não é um diretório')
-            raise NotADirectoryError()
-        index = dados.arquivo.get_entry(caminho_destino.pop(0))
-    dados = Dados(bitmap, fat, 'diretorio', index)
+            raise NotADirectoryError
+        index = dados.get_entry(caminho_destino.pop(0))
+    dados = Dados(bitmap, fat, index)
     dados.load(unidade)
     return dados
 
@@ -66,7 +65,7 @@ def cp(origem, destino):
     dados.save(unidade)
     
     # Criando um novo arquivo com o mesmo indice da entrada adicionado do diretório com os dados copiados do arquivo
-    dados = Dados(bitmap, fat, 'arquivo', index)
+    dados = Dados(bitmap, fat, index)
     file = open(origem)
     dados.set(nome_destino, file.read())
     file.close()
@@ -103,7 +102,7 @@ def mkdir(diretorio):
     dados.save(unidade)
     
     # Criando um diretorio vazio com o indice adicionado na entrada do outro diretório
-    dados = Dados(bitmap, fat, 'diretorio', index)
+    dados = Dados(bitmap, fat, index)
     dados.mkdir(nome_diretorio)
     dados.save(unidade)
     
@@ -114,10 +113,10 @@ def mkdir(diretorio):
 
 
 def rmdir_recursivo(index):
-    dados = Dados(bitmap, fat, 'diretorio', index)
+    dados = Dados(bitmap, fat, index)
     dados.load(unidade)
     nome = dados.get_nome()
-    for arquivos in dados.arquivo.keys():
+    for arquivos in dados.keys():
         index = dados.get_entry(arquivos)
         rmdir_recursivo(index)
     print(nome)
@@ -133,14 +132,14 @@ def rmdir(diretorio):
         index = dados.del_entry(nome_diretorio)
         dados.save(unidade)
 
-        dados = Dados(bitmap, fat, 'diretorio', index)
+        dados = Dados(bitmap, fat, index)
         dados.load(unidade)
-        for arquivos in dados.arquivo.keys():
+        for arquivos in dados.keys():
             index = dados.get_entry(arquivos)
             rmdir_recursivo(index)
         bitmap.set_1(index)
         print(nome_diretorio,
-              '%s removido%s com sucesso' % ('foram', 's') if len(dados.arquivo.keys()) else ('foi', ''))
+              '%s removido%s com sucesso' % ('foram', 's') if len(dados.keys()) else ('foi', ''))
     else:
         print('Diretório %s não existe' % nome_diretorio)
 
@@ -160,7 +159,7 @@ def cat(arquivo):
     dados, caminho_destino, nome_arquivo = pega_dados(arquivo)
     if dados.tem(nome_arquivo):
         index = dados.get_entry(nome_arquivo)
-        dados = Dados(bitmap, fat, 'arquivo', index)
+        dados = Dados(bitmap, fat, index)
         dados.load(unidade)
         print(dados.get_dado())
         dados.save(unidade)
@@ -174,7 +173,7 @@ def touch(arquivo):
     dados, caminho_destino, nome_arquivo = pega_dados(arquivo)
     if dados.tem(nome_arquivo):
         index = dados.get_entry(nome_arquivo)
-        dados = Dados(bitmap, fat, 'arquivo', index)
+        dados = Dados(bitmap, fat, index)
         dados.load(unidade)
         dados.get_dado()  # com o get_dado eu estou atualizando o instante de acesso
         dados.save(unidade)
@@ -182,7 +181,7 @@ def touch(arquivo):
         index = aloca()
         dados.add_entry(nome_arquivo, index)
         dados.save(unidade)
-        dados = Dados(bitmap, fat, 'arquivo', index)
+        dados = Dados(bitmap, fat, index)
         dados.set(nome_arquivo, '')
         dados.save(unidade)
     bitmap.save(unidade)
