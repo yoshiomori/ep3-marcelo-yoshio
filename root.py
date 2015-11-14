@@ -24,7 +24,7 @@ class Root(Dados):
         if index < 0 or 24984 < index:
             raise RuntimeError('index deve estar entre 0 e 24984')
         if len(self.tabela) > 26:
-            raise RuntimeError('Tabela excedeu tamanho máximo 14')
+            raise RuntimeError('Tabela excedeu tamanho máximo 26')
         self.access = asctime()
         self.tabela[nome] = index
 

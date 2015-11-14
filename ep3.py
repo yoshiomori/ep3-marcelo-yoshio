@@ -10,6 +10,9 @@ root = Root()
 
 def mount(arquivo):
     global unidade
+    if arquivo is None:
+        print('O comando mount precisa de nome de arquivo como argumento')
+        return
     try:
         unidade = open(arquivo, 'r+b')
         bitmap.load(unidade)
@@ -50,6 +53,9 @@ def aloca():
 
 
 def cp(origem, destino):
+    if origem is None or destino is None:
+        print('O comando precisa de 2 argumentos')
+        return
     try:
         dados, caminho_destino, nome_destino = pega_dados(destino)
     except FileNotFoundError:
@@ -92,6 +98,9 @@ def parse_path(destino):
 
 
 def mkdir(diretorio):
+    if diretorio is None:
+        print('mkdir precisa de um argumento')
+        return
     try:
         dados, caminho_destino, nome_diretorio = pega_dados(diretorio)
     except FileNotFoundError:
@@ -134,6 +143,9 @@ def rmdir_recursivo(index):
 
 
 def rmdir(diretorio):
+    if diretorio is None:
+        print('rmdir precisa de um argumento')
+        return
     try:
         dados, caminho_destino, nome_diretorio = pega_dados(diretorio)
     except FileNotFoundError:
@@ -169,6 +181,9 @@ def pega_dados(diretorio):
 
 
 def cat(arquivo):
+    if arquivo is None:
+        print('cat precisa de um argumento')
+        return
     try:
         dados, caminho_destino, nome_arquivo = pega_dados(arquivo)
     except FileNotFoundError:
@@ -186,6 +201,9 @@ def cat(arquivo):
 
 
 def touch(arquivo):
+    if arquivo is None:
+        print('touch precisa de um argumento')
+        return
     try:
         dados, caminho_destino, nome_arquivo = pega_dados(arquivo)
     except FileNotFoundError:
@@ -213,6 +231,9 @@ def touch(arquivo):
 
 
 def rm(arquivo):
+    if arquivo is None:
+        print('rm precisa de um argumento')
+        return
     dados, caminho_destino, nome_arquivo = pega_dados(arquivo)
     if nome_arquivo in dados.keys():
         index = dados.get_entry(nome_arquivo)
@@ -237,6 +258,9 @@ def faça_ls(dados):
 
 
 def ls(diretorio):
+    if diretorio is None:
+        print('ls precisa de um argumento')
+        return
     dados, caminho_destino, nome_arquivo = pega_dados(diretorio)
     if nome_arquivo is None:
         faça_ls(dados)
@@ -267,6 +291,9 @@ def find_recursive(dados, caminho_destino, arquivo_procurado):
 
 
 def find(diretorio, arquivo):
+    if diretorio is None or arquivo is None:
+        print('find precisa de dois argumentos')
+        return
     dados, caminho_destino, diretorio = pega_dados(diretorio)
     if diretorio is not None:
         if not dados.tem(diretorio):
