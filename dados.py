@@ -207,3 +207,9 @@ class Dados(object):
 
     def is_dir(self):
         return self.tipo == b'\xff'
+
+    def get_len_tabela(self):
+        return len(self.tabela)
+
+    def get_tamanho(self):
+        return self.tamanho

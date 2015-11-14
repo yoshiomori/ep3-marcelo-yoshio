@@ -15,9 +15,9 @@ class TestMkdir(unittest.TestCase):
         self.assertTrue(True)
         try:
             ep3.mkdir('/novodir/nnnnn/teste')
-            self.assertFalse(True)
-        except FileNotFoundError:
             self.assertTrue(True)
+        except FileNotFoundError:
+            self.assertFalse(True)
         os.remove('test')
 
 if __name__ == '__main__':

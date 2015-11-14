@@ -20,12 +20,12 @@ class Fat(object):
         return self.fat[index]
 
     def load(self, unidade):
-        unidade.seek(4000)
+        unidade.seek(3124)
         self.fat = [int.from_bytes(unidade.read(2), sys.byteorder, signed=True) for _ in range(0, 49970, 2)]
 
     def save(self, unidade):
         data = b''
         for value in self.fat:
             data += value.to_bytes(2, sys.byteorder, signed=True)
-        unidade.seek(4000)
+        unidade.seek(3124)
         unidade.write(data)

@@ -50,7 +50,10 @@ def aloca():
 
 
 def cp(origem, destino):
-    dados, caminho_destino, nome_destino = pega_dados(destino)
+    try:
+        dados, caminho_destino, nome_destino = pega_dados(destino)
+    except FileNotFoundError:
+        return
 
     if dados.tem(nome_destino):
         print('Este Arquivo já existe')
@@ -89,25 +92,28 @@ def parse_path(destino):
 
 
 def mkdir(diretorio):
-    dados, caminho_destino, nome_diretorio = pega_dados(diretorio)
+    try:
+        dados, caminho_destino, nome_diretorio = pega_dados(diretorio)
+    except FileNotFoundError:
+        return
 
     if dados.tem(nome_diretorio):
         print('Já existe este diretório')
         return
-    
+
     # É necessário o índice inicial ser alocado aqui, porque esse indice vai ser usado tanto como entrada no diretório
     # correspondente quanto como primeiro índice do bloco do arquivo copiado.
     index = aloca()
-    
+
     # Adicionando o índice do primeiro bloco da sequencia do novo arquivo como entrada do diretório destino
     dados.add_entry(nome_diretorio, index)
     dados.save(unidade)
-    
+
     # Criando um diretorio vazio com o indice adicionado na entrada do outro diretório
     dados = Dados(bitmap, fat, index)
     dados.mkdir(nome_diretorio)
     dados.save(unidade)
-    
+
     # Em cada operação devemos salvar o estado dos metadados
     bitmap.save(unidade)
     fat.save(unidade)
@@ -128,8 +134,10 @@ def rmdir_recursivo(index):
 
 
 def rmdir(diretorio):
-    dados, caminho_destino, nome_diretorio = pega_dados(diretorio)
-
+    try:
+        dados, caminho_destino, nome_diretorio = pega_dados(diretorio)
+    except FileNotFoundError:
+        return
     if dados.tem(nome_diretorio):
         index = dados.del_entry(nome_diretorio)
         dados.save(unidade)
@@ -151,14 +159,20 @@ def rmdir(diretorio):
 
 
 def pega_dados(diretorio):
-    caminho_destino, nome_diretorio = parse_path(diretorio)
+    try:
+        caminho_destino, nome_diretorio = parse_path(diretorio)
+    except FileNotFoundError:
+        return
     # Retorna um objeto do tipo Dados para diretório
     dados = percorre_caminho(caminho_destino)
     return dados, caminho_destino, nome_diretorio
 
 
 def cat(arquivo):
-    dados, caminho_destino, nome_arquivo = pega_dados(arquivo)
+    try:
+        dados, caminho_destino, nome_arquivo = pega_dados(arquivo)
+    except FileNotFoundError:
+        return
     if dados.tem(nome_arquivo):
         index = dados.get_entry(nome_arquivo)
         dados = Dados(bitmap, fat, index)
@@ -172,7 +186,10 @@ def cat(arquivo):
 
 
 def touch(arquivo):
-    dados, caminho_destino, nome_arquivo = pega_dados(arquivo)
+    try:
+        dados, caminho_destino, nome_arquivo = pega_dados(arquivo)
+    except FileNotFoundError:
+        return
     if dados.tem(nome_arquivo):
         index = dados.get_entry(nome_arquivo)
         dados = Dados(bitmap, fat, index)
@@ -234,18 +251,82 @@ def ls(diretorio):
     bitmap.save(unidade)
     fat.save(unidade)
     root.save(unidade)
-    pass
+
+
+def find_recursive(dados, caminho_destino, arquivo_procurado):
+    for nome_arquivo in dados.keys():
+        index = dados.get_entry(nome_arquivo)
+        arquivo = Dados(bitmap, fat, index)
+        arquivo.load(unidade)
+        if arquivo.is_dir():
+            find_recursive(arquivo, caminho_destino + [nome_arquivo], arquivo_procurado)
+        else:
+            if arquivo.get_nome() == arquivo_procurado:
+                print('/' + '/'.join(caminho_destino) + '/' + arquivo_procurado)
+                return
 
 
 def find(diretorio, arquivo):
+    dados, caminho_destino, diretorio = pega_dados(diretorio)
+    if diretorio is not None:
+        if not dados.tem(diretorio):
+            print('Diretório não encontrado')
+            return
+        index = dados.get_entry(diretorio)
+        dados = Dados(bitmap, fat, index)
+        dados.load(unidade)
+        if not dados.is_dir():
+            print('Não é um diretório')
+            return
+        find_recursive(dados, caminho_destino + [diretorio], arquivo)
+    else:
+        find_recursive(dados, caminho_destino, arquivo)
     bitmap.save(unidade)
     fat.save(unidade)
     root.save(unidade)
-    pass
 
 
 def df():
-    pass
+    quantidade_diretórios = 1
+    quantidade_arquivos = 0
+    espaço_livre = 99940000
+    espaço_desperdiçado = 224  # 224 B desperdiçado nos metadados
+    pilha = []
+
+    # Tratamento especial para o root
+    for nome_arquivo in root.keys():
+        index = root.get_entry(nome_arquivo)
+        arquivo = Dados(bitmap, fat, index)
+        arquivo.load(unidade)
+        if arquivo.is_dir():
+            quantidade_diretórios += 1
+            # 328 bytes para o cabeçalho do diretório e cada linha ocupa 257 bytes
+            espaço_desperdiçado += 4000 - arquivo.get_len_tabela() * 257 - 328
+            pilha.append(arquivo)
+        else:
+            quantidade_arquivos += 1
+            espaço_desperdiçado += 4000 - arquivo.get_tamanho() - 332  # 332 bytes para o cabeçalho do diretório
+        espaço_livre -= 4000
+
+    while len(pilha):
+        dado = pilha.pop()
+        for nome_arquivo in dado.keys():
+            index = dado.get_entry(nome_arquivo)
+            arquivo = Dados(bitmap, fat, index)
+            arquivo.load(unidade)
+            if arquivo.is_dir():
+                quantidade_diretórios += 1
+                # 328 bytes para o cabeçalho do diretório e cada linha ocupa 257 bytes
+                espaço_desperdiçado += 4000 - dado.get_len_tabela() * 257 - 328
+                pilha.append(arquivo)
+            else:
+                quantidade_arquivos += 1
+                espaço_desperdiçado += 4000 - dado.get_tamanho() - 332  # 332 bytes para o cabeçalho do diretório
+            espaço_livre -= 4000
+    print('quantidade diretórios:', quantidade_diretórios)
+    print('quantidade arquivos:', quantidade_arquivos)
+    print('espaço livre:', espaço_livre)
+    print('espaço desperdiçado:', espaço_desperdiçado)  # 224 B desperdiçado nos metadados)
 
 
 def umount():
