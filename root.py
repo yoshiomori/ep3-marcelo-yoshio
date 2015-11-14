@@ -87,3 +87,6 @@ class Root(object):
             dado += index.to_bytes(2, sys.byteorder)
         dado += b'\x00' * (len(dado) % 4000)
         file.write(dado)
+
+    def keys(self):
+        return self.tabela.keys()

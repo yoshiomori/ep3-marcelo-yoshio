@@ -79,10 +79,12 @@ def cp(origem, destino):
 
 def parse_path(destino):
     caminho_destino = []
+    nome_destino = None
     for s in destino.split('/'):
         if s is not '':
             caminho_destino.append(s)
-    nome_destino = caminho_destino.pop()
+    if len(caminho_destino):
+        nome_destino = caminho_destino.pop()
     return caminho_destino, nome_destino
 
 
@@ -175,6 +177,9 @@ def touch(arquivo):
         index = dados.get_entry(nome_arquivo)
         dados = Dados(bitmap, fat, index)
         dados.load(unidade)
+        if dados.is_dir():
+            print('É um diretório!')
+            return
         dados.get_dado()  # com o get_dado eu estou atualizando o instante de acesso
         dados.save(unidade)
     else:
@@ -203,7 +208,29 @@ def rm(arquivo):
     pass
 
 
+def faça_ls(dados):
+    for nome in dados.keys():
+        index = dados.get_entry(nome)
+        arquivo = Dados(bitmap, fat, index)
+        arquivo.load(unidade)
+        if arquivo.is_dir():
+            print(arquivo.get_nome(), '/', sep='')
+        else:
+            print(arquivo.get_nome())
+
+
 def ls(diretorio):
+    dados, caminho_destino, nome_arquivo = pega_dados(diretorio)
+    if nome_arquivo is None:
+        faça_ls(dados)
+    else:
+        index = dados.get_entry(nome_arquivo)
+        dados = Dados(bitmap, fat, index)
+        dados.load(unidade)
+        if dados.is_dir():
+            faça_ls(dados)
+        else:
+            print('É um diretório.')
     bitmap.save(unidade)
     fat.save(unidade)
     root.save(unidade)
