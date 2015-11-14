@@ -39,3 +39,5 @@ O primeiro bloco do arquivo tem :
 
 Quando a tabela do diretório é modificado o instante de acesso é atualizado.
 Quando o nome do diretório é modificado o instante de acesso e modificação são atualizados.
+
+Quando o comando cp é executado sem o nome_destino, o nome do arquivo origem é usado como nome do arquivo destino.

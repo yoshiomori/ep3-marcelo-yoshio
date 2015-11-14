@@ -61,6 +61,9 @@ def cp(origem, destino):
     except FileNotFoundError:
         return
 
+    if nome_destino is None:
+        _, nome_destino = parse_path(origem)
+
     if dados.tem(nome_destino):
         print('Este Arquivo já existe')
         return
