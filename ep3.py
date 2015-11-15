@@ -141,15 +141,15 @@ def mkdir(diretorio):
     root.save(unidade)
 
 
-def rmdir_recursivo(index):
+def rmdir_recursivo(index, caminho):
     dados = Dados(bitmap, fat, index)
-    dados.load(unidade)
-
-    nome = dados.get_nome()
-    for arquivos in dados.keys():
-        index = dados.get_entry(arquivos)
-        rmdir_recursivo(index)
-    print(nome)
+    dados.carrega_cabeçalho(unidade)
+    if dados.is_dir():
+        dados.load(unidade)
+        for arquivos in dados.keys():
+            index = dados.get_entry(arquivos)
+            rmdir_recursivo(index, caminho + [arquivos])
+    print('/' + '/'.join(caminho) + '/' + dados.get_nome())
     while index != -1:
         bitmap.set_1(index)
         index = fat.get(index)
@@ -177,7 +177,7 @@ def rmdir(diretorio):
             dado = Dados(bitmap, fat, index)
             dado.load(unidade)
             if dado.is_dir():
-                rmdir_recursivo(index)
+                rmdir_recursivo(index, caminho_destino + [nome_diretorio])
             else:
                 while index != -1:
                     bitmap.set_1(index)
@@ -271,7 +271,7 @@ def rm(arquivo):
     if nome_arquivo in dados.keys():
         index = dados.get_entry(nome_arquivo)
         arquivo = Dados(bitmap, fat, index)
-        arquivo.load(unidade)
+        arquivo.carrega_cabeçalho(unidade)
         if arquivo.is_dir():
             print('É um diretório')
             return
@@ -289,7 +289,7 @@ def faça_ls(dados):
     for nome in dados.keys():
         index = dados.get_entry(nome)
         arquivo = Dados(bitmap, fat, index)
-        arquivo.load(unidade)
+        arquivo.carrega_cabeçalho(unidade)
         if arquivo.is_dir():
             print(arquivo.get_nome(), '/', sep='')
         else:
@@ -306,7 +306,7 @@ def ls(diretorio):
     else:
         index = dados.get_entry(nome_arquivo)
         dados = Dados(bitmap, fat, index)
-        dados.load(unidade)
+        dados.carrega_cabeçalho(unidade)
         if dados.is_dir():
             faça_ls(dados)
         else:
@@ -396,10 +396,16 @@ def df():
 
 
 def umount():
+    global unidade, bitmap, fat, root
     bitmap.save(unidade)
     fat.save(unidade)
     root.save(unidade)
     unidade.close()
+
+    unidade = None
+    bitmap = BitMap()
+    fat = Fat()
+    root = Root()
 
 
 def main():

@@ -213,3 +213,12 @@ class Dados(object):
 
     def get_tamanho(self):
         return self.tamanho
+
+    def carrega_cabeçalho(self, file):
+        file.seek(60000 + (self.indexes + [self.last_index])[0] * 4000)
+        data = file.read(256)
+        self.parse_load_cabeçalho(data)
+
+    def parse_load_cabeçalho(self, dado):
+        self.tipo = dado[0:1]
+        self.nome = dado[1:256].replace(b'\x00', b'').decode()
