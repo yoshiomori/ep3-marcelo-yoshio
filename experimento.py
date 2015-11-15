@@ -3,6 +3,7 @@ import os
 import ep3
 from time import time
 
+file = open('resultado', 'w')
 
 # O sistemaVazio é o sistema de arquivos vazio
 # O sistema10MB é o o sistema de arquivos com 10MB ocupados
@@ -10,11 +11,12 @@ from time import time
 # A execução dessa função requer que os sistemas de arquivos: sistemaVazio, sistema10MB e sistema50MB tenham sido
 # devidamente inicializados
 
+
 # calcula o tempo de execução para a operação com os argumentos
 def tempo_op(op, args, r):
     instante_inicial = time()
     op(*args)
-    file.write('%s %d' % (r, time() - instante_inicial))
+    file.write('%s %f\n' % (r, time() - instante_inicial))
 
 
 def experimento():
@@ -43,7 +45,7 @@ def experimento():
         for i in range(30):
             caminho = '/pai/' + 'subdir/' * i
             ep3.mkdir(caminho)
-            for j in range(100):
+            for j in range(2):
                 ep3.touch(caminho + 'arquivo%d' % j)
 
         tempo_op(ep3.rmdir, ('/pai',), estado + ' - rmdir com arquivo')
@@ -71,7 +73,7 @@ def experimento():
         for i in range(30):
             caminho = '/pai/' + 'subdir/' * i
             ep3.mkdir(caminho)
-            for j in range(100):
+            for j in range(2):
                 ep3.touch(caminho + 'arquivo%d' % j)
 
         tempo_op(ep3.rmdir, ('/pai',), estado + ' - rmdir com arquivo')
@@ -101,17 +103,16 @@ def experimento():
         for i in range(30):
             caminho = '/pai/' + 'subdir/' * i
             ep3.mkdir(caminho)
-            for j in range(100):
+            for j in range(2):
                 ep3.touch(caminho + 'arquivo%d' % j)
 
         tempo_op(ep3.rmdir, ('/pai',), estado + ' - rmdir com arquivo')
         ep3.umount()
         os.remove(estado)
-    
+
 if __name__ == '__main__':
-    file = open('resultado', 'w')
     try:
         experimento()
     except MemoryError:
         pass
-    file.close()
+file.close()

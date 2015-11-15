@@ -203,7 +203,6 @@ def pega_dados(nome_arquivo):
     diretório = root
     for nome_diretório in caminho:
         if not diretório.tem(nome_diretório):
-            raise RuntimeError()
             print('Diretório não foi encontrado')
             raise FileNotFoundError
         diretório = Dados(bitmap, fat, diretório.get_entry(nome_diretório))
