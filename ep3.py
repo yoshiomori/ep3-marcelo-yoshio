@@ -11,6 +11,9 @@ root = Root()
 def mount(arquivo):
     global unidade
     if arquivo is None:
+        print('mount precisa de argumento')
+        return
+    if arquivo is None:
         print('O comando mount precisa de nome de arquivo como argumento')
         return
     try:
@@ -53,6 +56,12 @@ def aloca():
 
 
 def cp(origem, destino):
+    if origem is None:
+        print('origem faltando')
+        return
+    if destino is None:
+        print('destino faltando')
+        return
     if origem is None or destino is None:
         print('O comando precisa de 2 argumentos')
         return
@@ -240,9 +249,15 @@ def rm(arquivo):
     dados, caminho_destino, nome_arquivo = pega_dados(arquivo)
     if nome_arquivo in dados.keys():
         index = dados.get_entry(nome_arquivo)
+        arquivo = Dados(bitmap, fat, index)
+        arquivo.load(unidade)
+        if arquivo.is_dir():
+            print('É um diretório')
+            return
         while index != -1:
             bitmap.set_1(index)
             index = fat.get(index)
+        dados.del_entry(nome_arquivo)
     bitmap.save(unidade)
     fat.save(unidade)
     root.save(unidade)
@@ -274,7 +289,7 @@ def ls(diretorio):
         if dados.is_dir():
             faça_ls(dados)
         else:
-            print('É um diretório.')
+            print('É um arquivo.')
     bitmap.save(unidade)
     fat.save(unidade)
     root.save(unidade)
