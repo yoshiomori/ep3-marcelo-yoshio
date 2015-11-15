@@ -6,13 +6,9 @@ import sys
 class Dados(object):
     def __init__(self, bitmap=None, fat=None, index=-1):
         self.tipo = None
-        self.tipo_carregado = False
         self.nome = ''
-        self.nome_carregado = False
         self.tamanho = 0
-        self.tamanho_carregado = False
         self.access = ''
-        self.access_carregado
         self.modify = ''
         self.create = ''
         self.dado = ''
