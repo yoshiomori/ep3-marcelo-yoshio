@@ -144,12 +144,13 @@ def mkdir(diretorio):
 def rmdir_recursivo(index):
     dados = Dados(bitmap, fat, index)
     dados.load(unidade)
+
     nome = dados.get_nome()
     for arquivos in dados.keys():
         index = dados.get_entry(arquivos)
         rmdir_recursivo(index)
     print(nome)
-    while index is not -1:
+    while index != -1:
         bitmap.set_1(index)
         index = fat.get(index)
 
@@ -163,17 +164,27 @@ def rmdir(diretorio):
     except FileNotFoundError:
         return
     if dados.tem(nome_diretorio):
-        index = dados.del_entry(nome_diretorio)
+        index = dados.get_entry(nome_diretorio)
+        arquivo = Dados(bitmap, fat, index)
+        arquivo.load(unidade)
+        if not arquivo.is_dir():
+            print('Não é diretório')
+            return
+        dados.del_entry(nome_diretorio)
         dados.save(unidade)
-
-        dados = Dados(bitmap, fat, index)
-        dados.load(unidade)
-        for arquivos in dados.keys():
-            index = dados.get_entry(arquivos)
-            rmdir_recursivo(index)
-        bitmap.set_1(index)
+        for arquivos in arquivo.keys():
+            index = arquivo.get_entry(arquivos)
+            dado = Dados(bitmap, fat, index)
+            dado.load(unidade)
+            if dado.is_dir():
+                rmdir_recursivo(index)
+            else:
+                while index != -1:
+                    bitmap.set_1(index)
+                    index = fat.get(index)
         print(nome_diretorio,
-              '%s removido%s com sucesso' % ('foram', 's') if len(dados.keys()) else ('foi', ''))
+              '%s removido%s com sucesso' % ('foram', 's') if len(dados.keys())
+              else '%s removido%s com sucesso' % ('foi', ''))
     else:
         print('Diretório %s não existe' % nome_diretorio)
 
@@ -182,14 +193,25 @@ def rmdir(diretorio):
     root.save(unidade)
 
 
-def pega_dados(diretorio):
-    try:
-        caminho_destino, nome_diretorio = parse_path(diretorio)
-    except FileNotFoundError:
-        return
-    # Retorna um objeto do tipo Dados para diretório
-    dados = percorre_caminho(caminho_destino)
-    return dados, caminho_destino, nome_diretorio
+def pega_dados(nome_arquivo):
+    caminho = nome_arquivo.split('/')
+    while '' in caminho:
+        caminho.remove('')
+    if len(caminho) == 0:
+        return root, caminho, None
+    nome_arquivo = caminho.pop()
+    diretório = root
+    for nome_diretório in caminho:
+        if not diretório.tem(nome_diretório):
+            raise RuntimeError()
+            print('Diretório não foi encontrado')
+            raise FileNotFoundError
+        diretório = Dados(bitmap, fat, diretório.get_entry(nome_diretório))
+        diretório.load(unidade)
+        if not diretório.is_dir():
+            print(diretório.get_nome(), 'é um arquivo')
+            raise NotADirectoryError
+    return diretório, caminho, nome_arquivo
 
 
 def cat(arquivo):

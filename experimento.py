@@ -1,3 +1,5 @@
+import os
+
 import ep3
 from time import time
 
@@ -9,10 +11,10 @@ from time import time
 # devidamente inicializados
 
 # calcula o tempo de execução para a operação com os argumentos
-def tempo_op(op, args):
+def tempo_op(op, args, r):
     instante_inicial = time()
     op(*args)
-    return time() - instante_inicial
+    file.write('%s %d' % (r, time() - instante_inicial))
 
 
 def experimento():
@@ -22,25 +24,94 @@ def experimento():
         arquivo = open(nome_arquivo, 'wb')
         arquivo.write(b'\x00' * tamanho)  # Criando um arquivo com tamanho bytes
         arquivo.close()
-    ep3.mount('sistemaVazio')
-    intervalos = []
-    for nome_arquivo in ['arquivo1MB', 'arquivo10MB', 'arquivo30MB']:
-        intervalos.append(tempo_op(ep3.cp, (nome_arquivo, '/')))
-    for nome_arquivo in ['arquivo1MB', 'arquivo10MB', 'arquivo30MB']:
-        intervalos.append(tempo_op(ep3.rm, ('/' + nome_arquivo,)))
+    for k in range(30):
+        estado = 'sistema vazio %d' % k
+        ep3.mount(estado)
+        for nome_arquivo in ['arquivo1MB', 'arquivo10MB', 'arquivo30MB']:
+            tempo_op(ep3.cp, (nome_arquivo, '/'), estado + ' - ' + nome_arquivo + 'cp')
+        for nome_arquivo in ['arquivo1MB', 'arquivo10MB', 'arquivo30MB']:
+            tempo_op(ep3.rm, ('/' + nome_arquivo,), estado + ' - ' + nome_arquivo + 'rm')
 
-    # Criando o diretório pai com 30 níveis
-    for i in range(30):
-        ep3.mkdir('/pai/' + 'subdir/' * i)
+        # Criando o diretório pai com 30 níveis
+        for i in range(30):
+            ep3.mkdir('/pai/' + 'subdir/' * i)
 
-    ep3.rmdir('/pai')
+        tempo_op(ep3.rmdir, ('/pai',), estado + ' - rmdir sem arquivo')
 
-    # Criando o diretório pai com 30 níveis de hierarquia com centenas de arquivos regulares em todos os subdiretórios
-    for i in range(30):
-        caminho = '/pai/' + 'subdir/' * i
-        ep3.mkdir(caminho)
-        for j in range(100):
-            ep3.touch(caminho + 'arquivo%d' % j)
+        # Criando o diretório pai com 30 níveis de hierarquia com centenas de arquivos regulares em todos os
+        # subdiretórios
+        for i in range(30):
+            caminho = '/pai/' + 'subdir/' * i
+            ep3.mkdir(caminho)
+            for j in range(100):
+                ep3.touch(caminho + 'arquivo%d' % j)
 
-    ep3.rmdir('/pai')
-    ep3.umount()
+        tempo_op(ep3.rmdir, ('/pai',), estado + ' - rmdir com arquivo')
+        ep3.umount()
+        os.remove(estado)
+
+    for k in range(30):
+        # Sistema de arquivos com 10MB ocupados
+        estado = 'sistema 10MB ocupado %d' % k
+        ep3.mount(estado)
+        ep3.cp('arquivo10MB', '/ocupado10MB')
+        for nome_arquivo in ['arquivo1MB', 'arquivo10MB', 'arquivo30MB']:
+            tempo_op(ep3.cp, (nome_arquivo, '/'), estado + ' - ' + nome_arquivo + 'cp')
+        for nome_arquivo in ['arquivo1MB', 'arquivo10MB', 'arquivo30MB']:
+            tempo_op(ep3.rm, ('/' + nome_arquivo,), estado + ' - ' + nome_arquivo + 'rm')
+
+        # Criando o diretório pai com 30 níveis
+        for i in range(30):
+            ep3.mkdir('/pai/' + 'subdir/' * i)
+
+        tempo_op(ep3.rmdir, ('/pai',), estado + ' - rmdir sem arquivo')
+
+        # Criando o diretório pai com 30 níveis de hierarquia com centenas de arquivos regulares em todos os
+        # subdiretórios
+        for i in range(30):
+            caminho = '/pai/' + 'subdir/' * i
+            ep3.mkdir(caminho)
+            for j in range(100):
+                ep3.touch(caminho + 'arquivo%d' % j)
+
+        tempo_op(ep3.rmdir, ('/pai',), estado + ' - rmdir com arquivo')
+        ep3.umount()
+        os.remove(estado)
+
+    for k in range(30):
+        # Sistema de arquivos com 50MB ocupado
+        estado = 'sistema 50MB ocupado %d' % k
+        ep3.mount(estado)
+        ep3.cp('arquivo10MB', '/ocupado1')
+        ep3.cp('arquivo10MB', '/ocupado2')
+        ep3.cp('arquivo30MB', '/ocupado3')
+        for nome_arquivo in ['arquivo1MB', 'arquivo10MB', 'arquivo30MB']:
+            tempo_op(ep3.cp, (nome_arquivo, '/'), estado + ' - ' + nome_arquivo + 'cp')
+        for nome_arquivo in ['arquivo1MB', 'arquivo10MB', 'arquivo30MB']:
+            tempo_op(ep3.rm, ('/' + nome_arquivo,), estado + ' - ' + nome_arquivo + 'rm')
+
+        # Criando o diretório pai com 30 níveis
+        for i in range(30):
+            ep3.mkdir('/pai/' + 'subdir/' * i)
+
+        tempo_op(ep3.rmdir, ('/pai',), estado + ' - rmdir sem arquivo')
+
+        # Criando o diretório pai com 30 níveis de hierarquia com centenas de arquivos regulares em todos os
+        #  subdiretórios
+        for i in range(30):
+            caminho = '/pai/' + 'subdir/' * i
+            ep3.mkdir(caminho)
+            for j in range(100):
+                ep3.touch(caminho + 'arquivo%d' % j)
+
+        tempo_op(ep3.rmdir, ('/pai',), estado + ' - rmdir com arquivo')
+        ep3.umount()
+        os.remove(estado)
+    
+if __name__ == '__main__':
+    file = open('resultado', 'w')
+    try:
+        experimento()
+    except MemoryError:
+        pass
+    file.close()

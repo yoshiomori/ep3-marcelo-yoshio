@@ -67,7 +67,7 @@ class Dados(object):
         self.modify = dado[280:304].decode()
         self.access = dado[304:328].decode()
         self.tabela = dict()
-        for start in range(328, 4000, 257):
+        for start in range(328, 4000 * len(self.indexes + [self.last_index]), 257):
             nome = dado[start:start+255].replace(b'\x00', b'').decode()
             index = int.from_bytes(dado[start+255:start+257], sys.byteorder)
             if nome is not '':
