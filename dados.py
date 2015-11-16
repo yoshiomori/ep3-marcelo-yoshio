@@ -120,6 +120,7 @@ class Dados(object):
         if index < 0 or 24984 < index:
             raise RuntimeError('index deve estar entre 0 e 24984')
         self.access = asctime()
+        self.modify = asctime()
         self.tabela[nome] = index
 
     def del_entry(self, nome):
@@ -128,6 +129,7 @@ class Dados(object):
         if len(nome) > 255:
             raise RuntimeError('nome excedeu tamanho máximo(255)')
         self.access = asctime()
+        self.modify = asctime()
         try:
             return self.tabela.pop(nome)
         except KeyError:

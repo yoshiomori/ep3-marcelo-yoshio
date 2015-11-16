@@ -320,8 +320,9 @@ def find_recursive(dados, caminho_destino, arquivo_procurado):
     for nome_arquivo in dados.keys():
         index = dados.get_entry(nome_arquivo)
         arquivo = Dados(bitmap, fat, index)
-        arquivo.load(unidade)
+        arquivo.carrega_cabeçalho(unidade)
         if arquivo.is_dir():
+            arquivo.load(unidade)
             find_recursive(arquivo, caminho_destino + [nome_arquivo], arquivo_procurado)
         else:
             if arquivo.get_nome() == arquivo_procurado:
@@ -340,10 +341,11 @@ def find(diretorio, arquivo):
             return
         index = dados.get_entry(diretorio)
         dados = Dados(bitmap, fat, index)
-        dados.load(unidade)
+        dados.carrega_cabeçalho(unidade)
         if not dados.is_dir():
             print('Não é um diretório')
             return
+        dados.load(unidade)
         find_recursive(dados, caminho_destino + [diretorio], arquivo)
     else:
         find_recursive(dados, caminho_destino, arquivo)
