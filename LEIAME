@@ -2,5 +2,18 @@ Para rodar esse programa, deve-se usar Python3.
 O comando para rodar o programa:
     python3 ep3.py
 
-Ou o comando:
+Ou o comando, no diretório do make:
     make run
+
+Para rodar os experimentos:
+    python3 experimento/experimento.py <nome_sistema>
+
+Onde o nome do sistema pode ser:
+sistema_vazio - para o sistema inicialmente vazio
+sistema_10MB - para o sistema inicialmente com 10MB ocupado
+sistema_50MB - para o sistema inicialmente com 50MB ocupado
+
+Ou os comandos, no diretório do make:
+    make sv
+    make s10
+    make s50
