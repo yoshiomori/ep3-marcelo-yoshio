@@ -14,6 +14,10 @@ sistema_10MB - para o sistema inicialmente com 10MB ocupado
 sistema_50MB - para o sistema inicialmente com 50MB ocupado
 
 Ou os comandos, no diretório do make:
-    make sv
-    make s10
-    make s50
+    make init  # para gerar os arquivos iniciais(Demora muito tempo)
+    make sv  # para o sistema inicialmente vazio
+    make s10  # para o sistema inicialmente com 10MB ocupado
+    make s50  # para o sistema inicialmente com 50MB ocupado
+
+
+Tudo depois # é comentário
