@@ -1,47 +1,6 @@
 Para rodar esse programa, deve-se usar Python3.
+O comando para rodar o programa:
+    python3 ep3.py
 
-
-
-Unidade Simulada é dividida em 4 partes:
- 3124  B para armazenar o mapa de bits
-49970  B para armazenar o FAT
- 6906  B para armazenar o diretório raíz
-99940 kB para armazenar os dados
-O mapa de bits tem 24985 bits, cada bit diz se um bloco dos dados está em uso ou não.
-O FAT tem 24985 entradas, cada entrada representa o índice de um bloco dos dados.
-O diretório raiz é dividido em 4 partes:
-  24 B para armazenar o instante de criação.
-  24 B para armazenar o instante de modificação.
-  24 B para armazenar o instante de acesso.
-3928 B para armazenar a tabela, entradas com tudo 0x00 representam linhas vazias.
-As linhas da tabela são divididas em 2 partes:
- 255 B para armazenar o nome do arquivo no diretório.
-   2 B para armazenar o índice do bloco.
-O diretório raíz pode ter no máximo  26 arquivos, porque ele não tem o FAT para fazer o sequenciamento dos blocos, uma
-vez que a raíz pertence ao conjuto dos metadados. 24 bytes são desperdiçados nos metadados.
-
-O diretório é dividido em 6 partes:
-   1 B para armazenar a informação de que é Diretório, com 0xff.
- 255 B para armazenar o nome.
-  24 B para armazenar o instante de criação.
-  24 B para armazenar o instante de modificação.
-  24 B para armazenar o instante de acesso.
-3672 B para armazenar a tabela, entradas com tudo 0x00 representam linhas vazias.
-São 74 bytes desperdiçados em cada diretório.
-
-Os dados dos são divididos em 24985 blocos, cada bloco tem 4 kB.
-O primeiro bloco dos dados deve estar na posição 60000.
-Um conjuto de blocos é usado para armazenar um arquivo ou diretório.
-O primeiro bloco do arquivo tem :
-   1 B para armazenar a informação de que é Arquivo Regular, com 0x00.
- 255 B para armazenar o nome.
-   4 B para armazenar o tamanho do arquivo.
-  24 B para armazenar o instante de criação.
-  24 B para armazenar o instante de modificação.
-  24 B para armazenar o instante de acesso.
-3668 B para armazenar os conteudo do arquivo.
-
-Quando a tabela do diretório é modificado o instante de acesso é atualizado.
-Quando o nome do diretório é modificado o instante de acesso e modificação são atualizados.
-
-Quando o comando cp é executado sem o nome_destino, o nome do arquivo origem é usado como nome do arquivo destino.
+Ou o comando:
+    make run
