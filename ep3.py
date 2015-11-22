@@ -330,7 +330,7 @@ def find_recursive(dados, caminho_destino, arquivo_procurado):
             find_recursive(arquivo, caminho_destino + [nome_arquivo], arquivo_procurado)
         else:
             if arquivo.get_nome() == arquivo_procurado:
-                print('/' + '/'.join(caminho_destino) + '/' + arquivo_procurado)
+                print('/' if type(dados) is not Root else '' + '/'.join(caminho_destino) + '/' + arquivo_procurado)
                 return
 
 
