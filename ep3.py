@@ -328,7 +328,6 @@ def find_recursive(dados, caminho_destino, arquivo_procurado):
                 print(
                     '/' + '/'.join(caminho_destino) + '/' + arquivo_procurado if type(dados) is not Root else '/'.join(
                         caminho_destino) + '/' + arquivo_procurado)
-                return
 
 
 def find(diretorio, arquivo):
