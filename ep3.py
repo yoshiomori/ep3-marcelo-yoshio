@@ -2,6 +2,7 @@ from root import Root
 from mapa_bits import BitMap
 from fat import Fat
 from dados import Dados
+
 unidade = None
 bitmap = BitMap()
 fat = Fat()
@@ -84,14 +85,14 @@ def cp(origem, destino):
     # Adicionando o novo arquivo como entrada do diretório destino
     dados.add_entry(nome_destino, index)
     dados.save(unidade)
-    
+
     # Criando um novo arquivo com o mesmo indice da entrada adicionado do diretório com os dados copiados do arquivo
     dados = Dados(bitmap, fat, index)
     file = open(origem)
     dados.set(nome_destino, file.read())
     file.close()
     dados.save(unidade)
-    
+
     # Em cada operação devemos salvar o estado dos metadados
     bitmap.save(unidade)
     fat.save(unidade)
@@ -330,7 +331,9 @@ def find_recursive(dados, caminho_destino, arquivo_procurado):
             find_recursive(arquivo, caminho_destino + [nome_arquivo], arquivo_procurado)
         else:
             if arquivo.get_nome() == arquivo_procurado:
-                print('/' if type(dados) is not Root else '' + '/'.join(caminho_destino) + '/' + arquivo_procurado)
+                print(
+                    '/' + '/'.join(caminho_destino) + '/' + arquivo_procurado if type(dados) is not Root else '/'.join(
+                        caminho_destino) + '/' + arquivo_procurado)
                 return
 
 
@@ -455,5 +458,7 @@ def main():
                 print('mount, cp, mkdir, cat, touch, rm, ls, find, df, umount, sai')
         except RuntimeWarning:
             print('Comando inválido')
+
+
 if __name__ == '__main__':
     main()
