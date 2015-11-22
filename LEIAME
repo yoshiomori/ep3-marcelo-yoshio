@@ -4,10 +4,3 @@ O comando para rodar o programa:
 
 Ou o comando, no diretório do make:
     make run
-
-Ou os comandos, no diretório do make:
-    make init  # para gerar os arquivos iniciais(Demora muito tempo)
-    make experimento # para fazer os experimentos
-
-
-Tudo depois # é comentário
