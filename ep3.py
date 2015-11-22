@@ -349,7 +349,18 @@ def find(diretorio, arquivo):
         dados.load(unidade)
         find_recursive(dados, caminho_destino + [diretorio], arquivo)
     else:
-        find_recursive(dados, caminho_destino, arquivo)
+        for nome_arquivo in dados.keys():
+            index = dados.get_entry(nome_arquivo)
+            a = Dados(bitmap, fat, index)
+            a.carrega_cabeçalho(unidade)
+            if a.is_dir():
+                a.load(unidade)
+                find_recursive(a, caminho_destino + [nome_arquivo], arquivo)
+            else:
+                if a.get_nome() == arquivo:
+                    print(
+                        '/' + '/'.join(caminho_destino) + '/' + arquivo if type(dados) is not Root else '/'.join(
+                            caminho_destino) + '/' + arquivo)
     bitmap.save(unidade)
     fat.save(unidade)
     root.save(unidade)
