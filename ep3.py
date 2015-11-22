@@ -60,9 +60,6 @@ def cp(origem, destino):
     if destino is None:
         print('destino faltando')
         return
-    if origem is None or destino is None:
-        print('O comando precisa de 2 argumentos')
-        return
     try:
         dados, caminho_destino, nome_destino = pega_dados(destino)
     except FileNotFoundError:
