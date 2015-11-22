@@ -12,9 +12,6 @@ root = Root()
 def mount(arquivo):
     global unidade
     if arquivo is None:
-        print('mount precisa de argumento')
-        return
-    if arquivo is None:
         print('O comando mount precisa de nome de arquivo como argumento')
         return
     try:
