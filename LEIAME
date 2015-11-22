@@ -5,19 +5,9 @@ O comando para rodar o programa:
 Ou o comando, no diretório do make:
     make run
 
-Para rodar os experimentos:
-    python3 experimento/experimento.py <nome_sistema>
-
-Onde o nome do sistema pode ser:
-sistema_vazio - para o sistema inicialmente vazio
-sistema_10MB - para o sistema inicialmente com 10MB ocupado
-sistema_50MB - para o sistema inicialmente com 50MB ocupado
-
 Ou os comandos, no diretório do make:
     make init  # para gerar os arquivos iniciais(Demora muito tempo)
-    make sv  # para o sistema inicialmente vazio
-    make s10  # para o sistema inicialmente com 10MB ocupado
-    make s50  # para o sistema inicialmente com 50MB ocupado
+    make experimento # para fazer os experimentos
 
 
 Tudo depois # é comentário
