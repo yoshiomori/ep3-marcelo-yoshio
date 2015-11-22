@@ -289,11 +289,14 @@ def faça_ls(dados):
     for nome in dados.keys():
         index = dados.get_entry(nome)
         arquivo = Dados(bitmap, fat, index)
-        arquivo.carrega_cabeçalho(unidade)
+        arquivo.load(unidade)
         if arquivo.is_dir():
             print(arquivo.get_nome(), '/', sep='')
+            print(arquivo.modify)
         else:
             print(arquivo.get_nome())
+            print(arquivo.tamanho)
+            print(arquivo.modify)
 
 
 def ls(diretorio):
@@ -308,6 +311,7 @@ def ls(diretorio):
         dados = Dados(bitmap, fat, index)
         dados.carrega_cabeçalho(unidade)
         if dados.is_dir():
+            dados.load(unidade)
             faça_ls(dados)
         else:
             print('É um arquivo.')

@@ -24,19 +24,16 @@ def cria_arquivos():
         arquivo.close()
 
     ep3.mount('sistema_vazio')
-    insere_arquivos()
     ep3.umount()
 
     ep3.mount('sistema_10MB')
     ep3.cp('arquivo10MB', '/carga10MB')
-    insere_arquivos()
     ep3.umount()
 
     ep3.mount('sistema_50MB')
     ep3.cp('arquivo10MB', 'carga1')
     ep3.cp('arquivo10MB', 'carga2')
     ep3.cp('arquivo30MB', 'carga3')
-    insere_arquivos()
     ep3.umount()
 
 if __name__ == '__main__':
